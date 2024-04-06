@@ -1,0 +1,53 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gitlab-create-admin-pat
+  namespace: gitlab
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      containers:
+        - name: main
+          image: andranikasd/gitlab-pat-injector:v0.0.1
+          env:
+            - name: PG_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: gitlab-psql-app
+                  key: host
+            - name: PG_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: gitlab-psql-app
+                  key: port
+            - name: PG_DBNAME
+              valueFrom:
+                secretKeyRef:
+                  name: gitlab-psql-app
+                  key: dbname
+            - name: PG_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: gitlab-psql-app
+                  key: username
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gitlab-psql-app
+                  key: password
+            - name: USER_ID
+              value: "1"
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gitlab-admin-api-key
+                  key: api-key
+            - name: RAILS_SECRET_CONTENT
+              valueFrom:
+                secretKeyRef:
+                  name: gitlab-rails-secret
+                  key: secrets.yml
+          imagePullPolicy: Always
+      restartPolicy: OnFailure
